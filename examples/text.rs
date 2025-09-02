@@ -32,13 +32,13 @@ use winit::window::Window;
 fn run<W: WindowSurface>(mut canvas: Canvas<W::Renderer>, el: EventLoop<()>, mut surface: W, window: Arc<Window>) {
     let fonts = Fonts {
         sans: canvas
-            .add_font_mem(&resource!("examples/assets/Roboto-Regular.ttf"))
+            .add_font_mem(&resource!("examples/SourceHanSansSC-Normal.ttf"))
             .expect("Cannot add font"),
         bold: canvas
-            .add_font_mem(&resource!("examples/assets/Roboto-Bold.ttf"))
+            .add_font_mem(&resource!("examples/SourceHanSansSC-Normal.ttf"))
             .expect("Cannot add font"),
         light: canvas
-            .add_font_mem(&resource!("examples/assets/Roboto-Light.ttf"))
+            .add_font_mem(&resource!("examples/SourceHanSansSC-Normal.ttf"))
             .expect("Cannot add font"),
     };
 
@@ -137,7 +137,7 @@ fn run<W: WindowSurface>(mut canvas: Canvas<W::Renderer>, el: EventLoop<()>, mut
                 WindowEvent::RedrawRequested => {
                     let dpi_factor = window.scale_factor();
                     let size = window.inner_size();
-                    canvas.set_size(size.width, size.height, dpi_factor as f32);
+                    canvas.set_size(size.width, size.height, 1.0);
                     canvas.clear_rect(0, 0, size.width, size.height, Color::rgbf(0.9, 0.9, 0.9));
 
                     let elapsed = start.elapsed().as_secs_f32();
@@ -148,15 +148,15 @@ fn run<W: WindowSurface>(mut canvas: Canvas<W::Renderer>, el: EventLoop<()>, mut
                     perf.update(dt);
 
                     draw_baselines(&mut canvas, &fonts, 5.0, 50.0, font_size, supports_emojis);
-                    draw_alignments(&mut canvas, &fonts, 120.0, 200.0, font_size);
-                    draw_paragraph(&mut canvas, &fonts, x, y, font_size, LOREM_TEXT);
-                    draw_inc_size(&mut canvas, &fonts, 300.0, 10.0);
+                    //draw_alignments(&mut canvas, &fonts, 120.0, 200.0, font_size);
+                    //draw_paragraph(&mut canvas, &fonts, x, y, font_size, LOREM_TEXT);
+                    //draw_inc_size(&mut canvas, &fonts, 300.0, 10.0);
 
-                    draw_complex(&mut canvas, 300.0, 340.0, font_size);
+                    //draw_complex(&mut canvas, 300.0, 340.0, font_size);
 
-                    draw_stroked(&mut canvas, &fonts, size.width as f32 - 200.0, 100.0);
-                    draw_gradient_fill(&mut canvas, &fonts, size.width as f32 - 200.0, 180.0);
-                    draw_image_fill(&mut canvas, &fonts, size.width as f32 - 200.0, 260.0, image_id, elapsed);
+                    //draw_stroked(&mut canvas, &fonts, size.width as f32 - 200.0, 100.0);
+                    //draw_gradient_fill(&mut canvas, &fonts, size.width as f32 - 200.0, 180.0);
+                    //draw_image_fill(&mut canvas, &fonts, size.width as f32 - 200.0, 260.0, image_id, elapsed);
 
                     let paint = Paint::color(Color::hex("B7410E"))
                         .with_font(&[fonts.bold])
@@ -222,25 +222,42 @@ fn draw_baselines<T: Renderer>(
     if supports_emojis {
         base_text.push_str("🚀🌳");
     }
-
-    for (i, baseline) in baselines.iter().enumerate() {
+    
+    let mut draw = |i, baseline: &Baseline, base_text: &str| {
         let y = y + i as f32 * 40.0;
-
+    
         let mut path = Path::new();
         path.move_to(x, y + 0.5);
         path.line_to(x + 250., y + 0.5);
         canvas.stroke_path(&path, &Paint::color(Color::rgba(255, 32, 32, 128)));
-
+    
         paint.set_text_baseline(*baseline);
-
+    
         if let Ok(res) = canvas.fill_text(x, y, format!("{base_text} Baseline::{baseline:?}"), &paint) {
             //let res = canvas.fill_text(10.0, y, format!("d النص العربي جميل جدا {:?}", baseline), &paint);
-
+    
             let mut path = Path::new();
             path.rect(res.x, res.y, res.width(), res.height());
             canvas.stroke_path(&path, &Paint::color(Color::rgba(100, 100, 100, 64)));
         }
-    }
+    };
+
+    draw(0, &Baseline::Top, "dddd");
+    draw(1, &Baseline::Top, "dddd가나다라마바사");
+    draw(2, &Baseline::Top, "가나다라마바사");
+    draw(3, &Baseline::Middle, "dddd");
+    draw(4, &Baseline::Middle, "dddd가나다라마바사");
+    draw(5, &Baseline::Middle, "가나다라마바사");
+    draw(6, &Baseline::Alphabetic, "dddd");
+    draw(7, &Baseline::Alphabetic, "dddd가나다라마바사");
+    draw(8, &Baseline::Alphabetic, "가나다라마바사");
+    draw(9, &Baseline::Bottom, "dddd");
+    draw(10, &Baseline::Bottom, "dddd가나다라마바사");
+    draw(11, &Baseline::Bottom, "가나다라마바사");
+    
+    //for (i, baseline) in baselines.iter().enumerate() {
+    //    draw(i, baseline, &base_text);
+    //}
 }
 
 fn draw_alignments<T: Renderer>(canvas: &mut Canvas<T>, fonts: &Fonts, x: f32, y: f32, font_size: f32) {
